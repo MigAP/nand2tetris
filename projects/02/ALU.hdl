@@ -42,4 +42,33 @@ CHIP ALU {
 
     PARTS:
     //// Replace this comment with your code.
+
+    // X pre-processing
+    Not16(in=x, out=notx);
+    Mux4Way16(a=x,b=notx, c=false, d=false, out=prex);
+
+    // y pre-processing
+    Not16(in=y, out=noty);
+    Mux4Way16(a=y,b=noty, c=false, d=false, out=prey);
+
+    And16(a=prex, b=prey, out=xandy);
+    Not16(in=xandy, out=notxandy);
+
+    Add16(a=prex, b=prey, out=xplusy);
+    Not16(in=xplusy, out=notxplusy);
+
+    Mux4Way16(a=xandy,b=notxandy, c=xplusy, d=notxplusy, out=outdummy);
+    Not16(in=outdummy, out=notoutdummy);
+    Not16(in=notoutdummy, out=out);
+
+    // Zero detector
+    Not16(in=notoutdummy, out[0..7]=lowout, out[8..15]=highout);
+    Or8Way(in=lowout, out=outzr1); 
+    Or8Way(in=highout, out=outzr2); 
+    Or(a=outzr1, b=outzr2, out=notzr);
+    Not(in=notzr, out=zr); 
+
+    // Negative detector
+    Not16(in=outdummy, out[0..14]=dummyout, out[15]=outng1);
+    Not(in=outng1, out=ng);
 }
