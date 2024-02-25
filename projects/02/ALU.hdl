@@ -44,20 +44,25 @@ CHIP ALU {
     //// Replace this comment with your code.
 
     // X pre-processing
-    Not16(in=x, out=notx);
-    Mux4Way16(a=x,b=notx, c=false, d=false, out=prex);
+    Mux16(a=x, b=false, sel=zx, out=outzerox); 
+    Not16(in=outzerox, out=notoutzerox); 
+    Mux16(a=outzerox, b=notoutzerox, sel=nx, out=prex);
 
-    // y pre-processing
-    Not16(in=y, out=noty);
-    Mux4Way16(a=y,b=noty, c=false, d=false, out=prey);
+    // Y pre-processing
+    Mux16(a=y, b=false, sel=zy, out=outzeroy); 
+    Not16(in=outzeroy, out=notoutzeroy); 
+    Mux16(a=outzeroy, b=notoutzeroy, sel=ny, out=prey);
 
+    // Function Selector
     And16(a=prex, b=prey, out=xandy);
-    Not16(in=xandy, out=notxandy);
-
     Add16(a=prex, b=prey, out=xplusy);
-    Not16(in=xplusy, out=notxplusy);
+    Mux16(a=xandy, b=xplusy, sel=f, out=outfunction); 
 
-    Mux4Way16(a=xandy,b=notxandy, c=xplusy, d=notxplusy, out=outdummy);
+    // Negating output
+    Not16(in=outfunction, out=notoutfunction);
+    Mux16(a=outfunction, b=notoutfunction, sel=no, out=outdummy); 
+
+    // Dummy output for the zero and negative detector
     Not16(in=outdummy, out=notoutdummy);
     Not16(in=notoutdummy, out=out);
 
