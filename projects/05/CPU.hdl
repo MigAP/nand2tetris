@@ -32,5 +32,71 @@ CHIP CPU {
         pc[15];          // Address of next instruction
 
     PARTS:
-    //// Replace this comment with your code.
+    // D Register
+    And(a=instruction[15], b=instruction[4], out=loadDRegister); 
+    DRegister(in=ALUOutput, load=loadDRegister, out=inALUx); // load == d1
+
+    // A Register
+    Not(in=instruction[15], out=aInstruction); 
+    Or(a=aInstruction, b=instruction[5],out=loadARegister); 
+
+
+    Mux16(a=ALUOutput, b=instruction, sel=aInstruction, out=aRegisterInput); 
+    ARegister(in=aRegisterInput, load=loadARegister, out=aRegisterOutput); 
+
+    // ALU
+    Mux16(a=aRegisterOutput, b=inM, sel=instruction[12], out=inALUy); // a == instruction[12]
+    ALU(x=inALUx,
+        y=inALUy,
+        zx=instruction[11],
+	nx=instruction[10],
+	zy=instruction[9],
+	ny=instruction[8],
+	f=instruction[7],
+	no=instruction[6],
+	out=ALUOutput,
+	zr=zr,
+	ng=ng);
+
+    // Write-M
+    And(a=instruction[15], b=instruction[3], out=writeM); 
+
+    
+    // PC counter
+
+    // Load activation logic
+    Not(in=ng, out=notNg); 
+    Not(in=zr, out=notZr); 
+
+    And(a=notZr, b=notNg, out=strictlyPositive); 
+    And(a=instruction[0], b=strictlyPositive, out=JGT); 
+    And(a=instruction[1], b=zr, out=JEQ);
+    Or(a=JGT, b=JEQ, out=JGE); 
+    And(a=instruction[2], b=ng, out=JLT);
+    And(a=JGT, b=JLT, out=JNE);
+    Or(a=JLT,b=JEQ,out=JLE);  
+    And(a=instruction[0], b=instruction[1], out=d0Andd1);
+    And(a=d0Andd1, b=instruction[2], out=JMP); 
+
+    Or8Way(in[0]=JGT,
+           in[1]=JEQ,
+	   in[2]=JGE,
+	   in[3]=JLT,
+	   in[4]=JNE,
+	   in[5]=JLE,
+	   in[6]=JMP,
+	   in[7]=false,
+	   out=jumpInstruction);
+    And(a=jumpInstruction, b=instruction[15], out=loadPC); // load only if C instruction
+    Not(in=loadPC, out=noJump);  
+    PC(in=aRegisterOutput, reset=reset, inc=noJump, load=loadPC, out[0..14]=pc, out[15]=bar); 
+
+    // Address M
+    Not16(in=aRegisterOutput, out=notAddressM); 
+    Not16(in=notAddressM, out[0..14]=addressM, out[15]=toto); 
+
+    // outM
+    Not16(in=ALUOutput, out=notOutM); 
+    Not16(in=notOutM, out=outM); 
+
 }
