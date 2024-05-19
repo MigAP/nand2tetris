@@ -5,7 +5,7 @@
    ((string-null? dstr) "000")
    ((string=? dstr "M") "001")
    ((string=? dstr "D") "010")
-   ((string=? dstr "DM") "011")
+   ((string=? dstr "MD") "011")
    ((string=? dstr "A") "100")
    ((string=? dstr "AM") "101")
    ((string=? dstr "AD") "110")
