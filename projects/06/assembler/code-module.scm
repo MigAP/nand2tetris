@@ -38,7 +38,7 @@
    ((string=? cstr "M+1") "1110111")
    ((string=? cstr "M-1") "1110010")
    ((string=? cstr "D+M") "1000010")
-   ((string=? cstr "D-M") "1000111")
+   ((string=? cstr "D-M") "1010011")
    ((string=? cstr "M-D") "1000111")
    ((string=? cstr "D&M") "1000000")
    ((string=? cstr "D|M") "1010101")))
