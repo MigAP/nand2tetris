@@ -39,19 +39,38 @@
   (substring instruction 1 (string-length instruction)))
 
 (define (dest instruction)
-  (list-ref (string-split instruction "=") 0))
-
-
-(define (comp instruction)
-  (list-ref
-   (string-split
-    (list-ref (string-split instruction "=") 1) ";") 0))
+  (if (string-contains instruction "=")
+      (list-ref (string-split instruction "=") 0)
+      ""))
 
 
 (define (jump instruction)
-  (list-ref
-   (string-split
-    (list-ref (string-split instruction "=") 1) ";") 1))
+  (cond
+   ((string-contains instruction ";")
+    (if (string-contains instruction "=")
+	(list-ref
+	 (string-split
+	  (list-ref (string-split instruction "=") 1) ";") 1)
+	(list-ref
+	 (string-split instruction ";")
+	 1)))
+   (else "")))
+
+
+(define (comp instruction)
+  (cond
+   ((and (string-contains instruction "=")
+	 (string-contains instruction ";"))
+    (list-ref
+     (string-split
+      (list-ref (string-split instruction "=") 1) ";")
+     0))
+   ((string-contains instruction "=")
+    (list-ref (string-split instruction "=") 1))
+   ((string-contains instruction ";")
+    (list-ref (string-split instruction ";") 0))
+   (else "")))
+
 
 (define *a-instruction-identifier* #\@)
 
@@ -74,8 +93,8 @@
 	  (newline))
 	 ((eq? (instruction-type instruction) 'c-instruction)
 	  (display (make-string 3 #\1))
-	  (display (code-dest (dest instruction)))
 	  (display (code-comp (comp instruction)))
+	  (display (code-dest (dest instruction)))
 	  (display (code-jump (jump instruction)))
 	  (newline))))
       (loop (read-line iport)))
